@@ -127,9 +127,7 @@ const Edit = ({ recipe }) => {
             if (authUser) {
               const newDoc = await addFirestoreDoc(
                 COLLECTION_NAMES.RECIPE_DATA,
-                {
-                  list: [parsedRecipe],
-                }
+                parsedRecipe
               );
               const exists = await getSingleFirestoreDoc(
                 COLLECTION_NAMES.RECIPE_LISTS,
@@ -137,17 +135,17 @@ const Edit = ({ recipe }) => {
               );
 
               if (exists) {
-                await updateFirestoreDoc(
-                  {
-                    list: arrayUnion(newDoc.docId),
-                  },
-                  COLLECTION_NAMES.RECIPE_LISTS,
-                  authUser.uid
+                console.log(
+                  await updateFirestoreDoc(
+                    { "All_Recipes.list": arrayUnion(newDoc.docId) },
+                    COLLECTION_NAMES.RECIPE_LISTS,
+                    authUser.uid
+                  )
                 );
               } else
                 await mergeFirestoreDoc(
                   {
-                    list: arrayUnion(newDoc.docId),
+                    All_Recipes: { list: [newDoc.docId], name: "All Recipes" },
                     uid: authUser.uid,
                   },
                   COLLECTION_NAMES.RECIPE_LISTS,
