@@ -81,6 +81,7 @@ const Dashboard = () => {
   }, [currentDrag]);
 
   const changeGrouping = async () => {
+    if (currentDrag.homeList.id === currentDrag.destinationList.id) return;
     if (
       (
         await updateFirestoreDoc(
