@@ -1,8 +1,6 @@
 import "../styles/globals.css";
-import { useState } from "react";
-import { useRouter } from "next/router";
 import Head from "next/head";
-import { AuthUserProvider } from "lib/AuthUserContext";
+import { AuthUserProvider, useAuth } from "lib/AuthUserContext";
 import Container from "src/Container";
 import Link from "next/link";
 import Image from "next/image";
@@ -28,7 +26,8 @@ function MyApp({ Component, pageProps }) {
   );
 }
 
-export const Header = ({ authUser, signOutFirebaseUser }) => {
+export const Header = ({}) => {
+  const { authUser, signOutFirebaseUser, loading } = useAuth();
   return (
     <header className={styles.header}>
       <Link href={"/"}>
@@ -42,11 +41,14 @@ export const Header = ({ authUser, signOutFirebaseUser }) => {
         </a>
       </Link>
       <nav className={styles.nav}>
+        <Link href="/dashboard">
+          <a className={styles.login}>Dashboard</a>
+        </Link>
         {authUser ? (
           <button
             className={styles.logout}
             onClick={async () => {
-              // await signOutFirebaseUser();
+              await signOutFirebaseUser();
             }}
           >
             Log Out

@@ -6,24 +6,11 @@
   justify-content: center;
   align-items: center;
 }
-
 .main {
   padding: 1rem 0 1.5rem 0;
   flex: 1;
   display: flex;
-  flex-direction: column;
   justify-content: center;
-  align-items: center;
-}
-
-.header {
-  position: sticky;
-  width: 100%;
-  padding: 1rem 0rem;
-  display: flex;
-  justify-content: space-between;
-}
-
-.login {
-  margin-right: 1rem;
+  align-content: center;
+  flex-wrap: wrap;
 }

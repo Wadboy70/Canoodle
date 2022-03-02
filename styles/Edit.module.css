@@ -5,4 +5,39 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  width: 90vw;
 }
+
+.main ol {
+  width: 100%;
+}
+
+.main ul li {
+  list-style-type: none;
+}
+
+.main li > * {
+  vertical-align: text-top;
+}
+
+.main textarea,
+.main input {
+  border: none;
+  min-width: 50vw;
+}
+
+.main ol input {
+  font-weight: 900;
+}
+
+.main textarea {
+  min-height: 4rem;
+  resize: none;
+  border: none;
+}
+
+/* .main textarea ::-webkit-scrollbar {
+  width: 0; 
+  background: transparent; 
+} 
+*/
