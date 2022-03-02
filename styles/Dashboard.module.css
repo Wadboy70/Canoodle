@@ -31,3 +31,13 @@
 .recipe img {
   max-width: 90%;
 }
+
+.listTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.groceryButton {
+  height: fit-content;
+}
