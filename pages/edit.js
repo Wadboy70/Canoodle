@@ -26,7 +26,7 @@ const drillAndReplace = (obj, arr, rep) => {
       };
 };
 
-const replaceAt = (array, index, value) => {
+export const replaceAt = (array, index, value) => {
   const ret = array.slice(0);
   ret[index] = value;
   return ret;
