@@ -41,18 +41,20 @@ export const Header = ({}) => {
         </a>
       </Link>
       <nav className={styles.nav}>
-        <Link href="/dashboard">
-          <a className={styles.login}>Dashboard</a>
-        </Link>
         {authUser ? (
-          <button
-            className={styles.logout}
-            onClick={async () => {
-              await signOutFirebaseUser();
-            }}
-          >
-            Log Out
-          </button>
+          <>
+            <Link href="/dashboard">
+              <a className={styles.login}>Dashboard</a>
+            </Link>
+            <button
+              className={styles.logout}
+              onClick={async () => {
+                await signOutFirebaseUser();
+              }}
+            >
+              Log Out
+            </button>
+          </>
         ) : (
           <Link href="/login">
             <a className={styles.login}>

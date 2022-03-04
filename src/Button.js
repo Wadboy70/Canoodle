@@ -1,9 +1,9 @@
 import styles from "styles/Button.module.css";
 
-const Button = ({ onClick, children, className, ...otherClasses }) => (
+const Button = ({ children, className, ...otherClasses }) => (
   <button
-    className={`${styles.button} ${className}`}
-    onClick={onClick}
+    className={`${styles.button} ${className ? className : ""}`}
+    // onClick={onClick}
     {...otherClasses}
   >
     {children}

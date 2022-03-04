@@ -32,6 +32,7 @@ const SignUp = () => {
   });
 
   const onSubmit = async (event) => {
+    console.log("submit");
     event.preventDefault();
     setError(null);
 
@@ -56,6 +57,7 @@ const SignUp = () => {
     else setError("Password do not match");
   };
   const onSignIn = async (e) => {
+    console.log("signing in");
     await signInWithFirebaseEmailAndPassword(
       loginEmail,
       loginPassword,
@@ -131,6 +133,7 @@ const SignUp = () => {
             onChange={(event) => setLoginPassword(event.target.value)}
             id="loginPassword"
             placeholder="Password"
+            label="Password"
           />
           <Button>Sign In</Button>
           <Button

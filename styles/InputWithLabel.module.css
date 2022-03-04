@@ -3,4 +3,5 @@
   border-radius: 0.5rem;
   border: lightgray 1px solid;
   margin: 0.2rem 0;
+  display: flex;
 }

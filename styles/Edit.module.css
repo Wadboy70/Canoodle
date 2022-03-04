@@ -8,6 +8,10 @@
   width: 90vw;
 }
 
+.main > p {
+  margin-top: 0;
+}
+
 .main ol {
   width: 100%;
 }

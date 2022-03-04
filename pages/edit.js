@@ -116,51 +116,50 @@ const Edit = ({ recipe }) => {
     );
   }
 
+  const saveRecipe = async () => {
+    if (loading) return;
+    setLoading(true);
+    if (authUser) {
+      const newDoc = await addFirestoreDoc(
+        COLLECTION_NAMES.RECIPE_DATA,
+        parsedRecipe
+      );
+      const exists = await getSingleFirestoreDoc(
+        COLLECTION_NAMES.RECIPE_LISTS,
+        authUser.uid
+      );
+
+      if (exists) {
+        console.log(
+          await updateFirestoreDoc(
+            { "All_Recipes.list": arrayUnion(newDoc.docId) },
+            COLLECTION_NAMES.RECIPE_LISTS,
+            authUser.uid
+          )
+        );
+      } else
+        await mergeFirestoreDoc(
+          {
+            All_Recipes: { list: [newDoc.docId], name: "All Recipes" },
+            uid: authUser.uid,
+          },
+          COLLECTION_NAMES.RECIPE_LISTS,
+          authUser.uid
+        );
+      router.push("/dashboard");
+    } else if (typeof window !== "undefined") {
+      alert("log in to save recipes!");
+    }
+    setLoading(false);
+  };
+
   return (
     <div className={styles.main}>
       <h1>Edit Recipe</h1>
+      <p>Click the fields below to edit the recipes!</p>
       <Form>
-        <Button
-          onClick={async () => {
-            if (loading) return;
-            setLoading(true);
-            if (authUser) {
-              const newDoc = await addFirestoreDoc(
-                COLLECTION_NAMES.RECIPE_DATA,
-                parsedRecipe
-              );
-              const exists = await getSingleFirestoreDoc(
-                COLLECTION_NAMES.RECIPE_LISTS,
-                authUser.uid
-              );
-
-              if (exists) {
-                console.log(
-                  await updateFirestoreDoc(
-                    { "All_Recipes.list": arrayUnion(newDoc.docId) },
-                    COLLECTION_NAMES.RECIPE_LISTS,
-                    authUser.uid
-                  )
-                );
-              } else
-                await mergeFirestoreDoc(
-                  {
-                    All_Recipes: { list: [newDoc.docId], name: "All Recipes" },
-                    uid: authUser.uid,
-                  },
-                  COLLECTION_NAMES.RECIPE_LISTS,
-                  authUser.uid
-                );
-              router.push("/dashboard");
-            } else if (typeof window !== "undefined") {
-              alert("log in to save recipes!");
-            }
-            setLoading(false);
-          }}
-        >
-          Save Recipe
-        </Button>
-        <Button>Discard Recipe</Button>
+        <Button onClick={saveRecipe}>Save Recipe</Button>
+        {/* <Button>Discard Recipe</Button> */}
         <br />
         {loading && <p>loading...</p>}
         <h2>Instructions</h2>
@@ -193,6 +192,7 @@ const Edit = ({ recipe }) => {
             </li>
           ))}
         </ul>
+        <Button onClick={saveRecipe}>Save Recipe</Button>
       </Form>
     </div>
   );

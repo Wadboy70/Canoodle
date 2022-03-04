@@ -4,6 +4,7 @@ import {
   addFirestoreDoc,
   COLLECTION_NAMES,
   getSingleFirestoreDoc,
+  mergeFirestoreDoc,
   updateFirestoreDoc,
 } from "lib/firestore";
 import Link from "next/link";
@@ -16,9 +17,9 @@ import styles from "styles/Dashboard.module.css";
 
 const Dashboard = () => {
   const router = useRouter();
-  const { authUser } = useAuth();
+  const { authUser, loading } = useAuth();
   const [listName, setListName] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [dashLoading, setDashLoading] = useState(false);
   const [gallery, setGallery] = useState(null);
   const [mouseLocation, setMouseLocation] = useState({
     left: 0,
@@ -29,16 +30,28 @@ const Dashboard = () => {
     homeList: null,
     destinationList: null,
   });
-
-  useEffect(() => {
-    if (authUser === "null") router.push("/");
-  }, [authUser, router]);
   const populateGallery = async () => {
-    const list = await getSingleFirestoreDoc(
+    let list = await getSingleFirestoreDoc(
       COLLECTION_NAMES.RECIPE_LISTS,
       authUser.uid
     );
-    if (!list || list.error) setGallery([]);
+    if (!list) {
+      await mergeFirestoreDoc(
+        {
+          All_Recipes: { list: [], name: "All Recipes" },
+          uid: authUser.uid,
+        },
+        COLLECTION_NAMES.RECIPE_LISTS,
+        authUser.uid
+      );
+      list = await getSingleFirestoreDoc(
+        COLLECTION_NAMES.RECIPE_LISTS,
+        authUser.uid
+      );
+    } else if (list.error) {
+      setGallery([]);
+      return;
+    }
     const lists = Object.getOwnPropertyNames(list);
     const dbLists = (
       await Promise.all(
@@ -80,6 +93,23 @@ const Dashboard = () => {
     console.log(currentDrag);
   }, [currentDrag]);
 
+  if (loading) {
+    return (
+      <div className={styles.main}>
+        <p>loading...</p>
+      </div>
+    );
+  } else if (authUser === null && !loading) {
+    return (
+      <div className={styles.main}>
+        <p>
+          You can only access this page when authenticated :( Please click the
+          login button above!
+        </p>
+      </div>
+    );
+  }
+
   const changeGrouping = async () => {
     if (currentDrag.homeList.id === currentDrag.destinationList.id) return;
     if (
@@ -113,12 +143,54 @@ const Dashboard = () => {
     populateGallery();
     return true;
   };
+  const addList = async () => {
+    setDashLoading(true);
+    if (
+      (listName.replace(/\s+/g, "") === "" || listName == "error") &&
+      typeof window !== "undefined"
+    ) {
+      alert("invalid list name");
+      setDashLoading(false);
+      return;
+    }
+    const lists = await getSingleFirestoreDoc(
+      COLLECTION_NAMES.RECIPE_LISTS,
+      authUser.uid
+    );
+
+    if (
+      (!lists ||
+        lists.error ||
+        Object.getOwnPropertyNames(lists).find(
+          (val) => lists[val]?.name == listName
+        )) &&
+      typeof window !== "undefined"
+    ) {
+      alert("cannot add list, check to see if it already exists");
+      setDashLoading(false);
+      return;
+    }
+
+    await updateFirestoreDoc(
+      {
+        [listName.replace(/\s+/g, "")]: {
+          list: [],
+          name: listName,
+          date: new Date(),
+        },
+      },
+      COLLECTION_NAMES.RECIPE_LISTS,
+      authUser.uid
+    );
+    populateGallery();
+    setDashLoading(false);
+  };
 
   return (
     <div className={styles.main}>
       <h1>Dashboard</h1>
-      <Form>
-        {loading && <p>loading...</p>}
+      <Form onSubmit={addList} className={styles.newList}>
+        {dashLoading && <p>loading...</p>}
         <InputWithLabel
           type={"text"}
           name="listname"
@@ -126,54 +198,11 @@ const Dashboard = () => {
           onChange={(e) => setListName(e.target.value)}
           label="Make a New List"
           placeholder={"New List Name"}
+          className={styles.listForm}
         />
-        <Button
-          onClick={async () => {
-            setLoading(true);
-            if (
-              (listName.replace(/\s+/g, "") === "" || listName == "error") &&
-              typeof window !== "undefined"
-            ) {
-              alert("invalid list name");
-              setLoading(false);
-              return;
-            }
-            const lists = await getSingleFirestoreDoc(
-              COLLECTION_NAMES.RECIPE_LISTS,
-              authUser.uid
-            );
-
-            if (
-              (!lists ||
-                lists.error ||
-                Object.getOwnPropertyNames(lists).find(
-                  (val) => lists[val]?.name == listName
-                )) &&
-              typeof window !== "undefined"
-            ) {
-              alert("cannot add list, check to see if it already exists");
-              setLoading(false);
-              return;
-            }
-
-            await updateFirestoreDoc(
-              {
-                [listName.replace(/\s+/g, "")]: {
-                  list: [],
-                  name: listName,
-                  date: new Date(),
-                },
-              },
-              COLLECTION_NAMES.RECIPE_LISTS,
-              authUser.uid
-            );
-            populateGallery();
-            setLoading(false);
-          }}
-        >
-          Submit
-        </Button>
+        <Button>Submit</Button>
       </Form>
+      <p>ⓘ Tip: Click and Drag recipes to move them to new lists!</p>
       <div className={styles.gallery}>
         {gallery &&
           gallery.map((list, i) => (
@@ -198,7 +227,7 @@ const Dashboard = () => {
                     router.push(`/list/${list.id}`);
                   }}
                 >
-                  Turn this into a grocery list!
+                  Make a grocery list!
                 </Button>
               </span>
               <hr />
@@ -235,7 +264,17 @@ const Dashboard = () => {
                     >
                       <h3>{recipe.name}</h3>
                       {recipe.image && (
-                        <img src={recipe.image} alt={recipe.name} />
+                        <div
+                          className={styles.recipeImage}
+                          style={{
+                            "background-image": `url(${
+                              typeof recipe.image === "string"
+                                ? recipe.image
+                                : recipe?.image?.[0]
+                            })`,
+                          }}
+                          alt={recipe.name}
+                        />
                       )}
                     </a>
                   </Link>

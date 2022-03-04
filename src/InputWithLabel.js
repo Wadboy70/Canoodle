@@ -7,8 +7,10 @@ const InputWithLabel = ({
   id,
   placeholder,
   label,
+  className,
+  ...otherClasses
 }) => (
-  <div className={styles.inputContainer}>
+  <div className={`${styles.inputContainer} ${className ? className : ""}`}>
     <label>{label}</label>
     <input
       type={type}
@@ -17,6 +19,7 @@ const InputWithLabel = ({
       onChange={onChange}
       id={id}
       placeholder={placeholder}
+      {...otherClasses}
     />
   </div>
 );
