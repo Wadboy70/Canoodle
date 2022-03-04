@@ -230,14 +230,24 @@ const Dashboard = () => {
             >
               <span className={styles.listTitle}>
                 <h2>{list.listName && list.listName}</h2>
-                <Button
-                  className={styles.groceryButton}
-                  onClick={() => {
-                    router.push(`/list/${list.id}`);
-                  }}
-                >
-                  Make a grocery list!
-                </Button>
+                <div>
+                  <Button
+                    className={styles.groceryButton}
+                    onClick={() => {
+                      router.push(`/list/${list.id}`);
+                    }}
+                  >
+                    Make a grocery list!
+                  </Button>
+                  {/* <Button onClick={()=>{
+                    if(typeof window !== "undefined"){
+                      const confirm = alert("Are you sure you want to delete this list?");
+                      if(confirm){
+                        
+                      }
+                    }
+                  }}>Delete List</Button> */}
+                </div>
               </span>
               <hr />
               <div className={styles.rowContainer}>

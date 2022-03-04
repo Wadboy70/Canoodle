@@ -10,8 +10,15 @@
 .listItem {
   display: flex;
   align-items: center;
+  min-width: 30vw;
+  display: flex;
 }
 
 .listItem > input:checked + p {
   text-decoration: line-through;
+}
+
+.ingredient {
+  flex-grow: 1;
+  border: none;
 }

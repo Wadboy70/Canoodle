@@ -54,7 +54,11 @@ const ListId = ({ id }) => {
           {list.map((ingredient, i) => (
             <li key={i} className={styles.listItem}>
               <input type="checkbox" name="listItem" id="listItem" />
-              <p>{ingredient}</p>
+              <input
+                type="text"
+                value={ingredient}
+                className={styles.ingredient}
+              />
             </li>
           ))}
         </ul>
