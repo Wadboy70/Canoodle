@@ -52,13 +52,9 @@ const ListId = ({ id }) => {
       {list && (
         <ul>
           {list.map((ingredient, i) => (
-            <li key={ingredient}>
-              <input
-                type="text"
-                value={ingredient}
-                onChange={(e) => setList(replaceAt(list, i, e.target.value))}
-                style={{ width: "100%" }}
-              />
+            <li key={i} className={styles.listItem}>
+              <input type="checkbox" name="listItem" id="listItem" />
+              <p>{ingredient}</p>
             </li>
           ))}
         </ul>

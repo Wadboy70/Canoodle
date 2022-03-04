@@ -27,3 +27,8 @@
 .login {
   margin-right: 1rem;
 }
+.logout {
+  background: none;
+  border: none;
+  font: inherit;
+}
