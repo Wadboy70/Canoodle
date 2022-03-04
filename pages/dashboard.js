@@ -111,7 +111,12 @@ const Dashboard = () => {
   }
 
   const changeGrouping = async () => {
-    if (currentDrag.homeList.id === currentDrag.destinationList.id) return;
+    if (
+      currentDrag.homeList.id === currentDrag.destinationList.id ||
+      dashLoading
+    )
+      return;
+    setDashLoading(true);
     if (
       (
         await updateFirestoreDoc(
@@ -124,9 +129,10 @@ const Dashboard = () => {
           authUser.uid
         )
       ).error
-    )
+    ) {
+      setDashLoading(false);
       return false;
-    else if (
+    } else if (
       (
         await updateFirestoreDoc(
           {
@@ -138,9 +144,12 @@ const Dashboard = () => {
           authUser.uid
         )
       ).error
-    )
+    ) {
+      setDashLoading(false);
       return false;
+    }
     populateGallery();
+    setDashLoading(false);
     return true;
   };
   const addList = async () => {
@@ -189,8 +198,8 @@ const Dashboard = () => {
   return (
     <div className={styles.main}>
       <h1>Dashboard</h1>
+      {dashLoading && <p>loading...</p>}
       <Form onSubmit={addList} className={styles.newList}>
-        {dashLoading && <p>loading...</p>}
         <InputWithLabel
           type={"text"}
           name="listname"
