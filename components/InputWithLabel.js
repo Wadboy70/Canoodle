@@ -1,4 +1,3 @@
-import styles from "styles/InputWithLabel.module.css";
 const InputWithLabel = ({
   type,
   name,
@@ -7,11 +6,11 @@ const InputWithLabel = ({
   id,
   placeholder,
   label,
-  className,
+  className = "",
   ...otherClasses
 }) => (
-  <div className={`${styles.inputContainer} ${className ? className : ""}`}>
-    <label>{label}</label>
+  <div className={className}>
+    {label && <label>{label}</label>}
     <input
       type={type}
       name={name}
@@ -19,6 +18,7 @@ const InputWithLabel = ({
       onChange={onChange}
       id={id}
       placeholder={placeholder}
+      className={`p-1 rounded-full my-1 flex rounded-md text-center shadow-lg px-5 py-2 w-full focus:outline-0`}
       {...otherClasses}
     />
   </div>
