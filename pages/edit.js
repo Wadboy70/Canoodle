@@ -41,6 +41,7 @@ export const RenderInstructions = ({
   onChangeInput = () => {},
   editMode = false,
   top = false,
+  onChangeTextAreaInput = () => {},
 }) => {
   return (
     <ListType top={top}>
@@ -76,11 +77,7 @@ export const RenderInstructions = ({
               <textarea
                 type="text"
                 value={instruction}
-                onChange={(e) => {
-                  setParsedRecipe(
-                    drillAndReplace(parsedRecipe, [...drill, i], e.target.value)
-                  );
-                }}
+                onChange={(e) => onChangeTextAreaInput(e, drill, i)}
                 className="w-full resize-none"
               />
             ) : (
@@ -216,6 +213,11 @@ const Edit = ({ recipe }) => {
                 [...drill, i, "name"],
                 e.target.value
               )
+            );
+          }}
+          onChangeTextAreaInput={(e, drill, i) => {
+            setParsedRecipe(
+              drillAndReplace(parsedRecipe, [...drill, i], e.target.value)
             );
           }}
           top
