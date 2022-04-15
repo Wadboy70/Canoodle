@@ -285,7 +285,7 @@ const RecipeList = ({ recipeData, expandedDefault = false }) => {
       </span>
       <div
         className={`grid grid-cols-dashRecipe gap-6 w-full items-center items-stretch ${
-          expanded ? "h-56" : "h-0"
+          expanded ? "" : "h-0"
         }`}
       >
         {loading ? (
@@ -367,7 +367,7 @@ const Recipe = ({ recipe, listId }) => {
     <>
       <LinkContainer href={`/view/${recipe.id}`}>
         <a
-          className={`border-black rounded-xl border-solid border border-0 overflow-hidden m-2 bg-white shadow-xl flex flex-col`}
+          className={`border-black rounded-xl border-solid border border-0 overflow-hidden m-2 bg-white shadow-xl flex flex-col h-56`}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
           onDrag={handleDrag}
