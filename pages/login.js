@@ -2,11 +2,12 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import styles from "styles/Login.module.css";
-import InputWithLabel from "src/InputWithLabel";
-import Button from "src/Button";
+import InputWithLabel from "components/InputWithLabel";
+import Button from "components/Button";
 import { useAuth } from "lib/AuthUserContext";
-import Form from "src/Form";
+import Form from "components/Form";
 import { COLLECTION_NAMES, getSingleFirestoreDoc } from "lib/firestore";
+import Container from "components/Container";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
@@ -70,13 +71,14 @@ const SignUp = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <main className={styles.main}>
+    <Container bgImage>
+      <div className="flex justify-center flex-wrap">
         <Form
           onSubmit={(e) => {
             e.preventDefault();
             onSubmit(e);
           }}
+          className="mb-6"
         >
           <h2>Sign Up</h2>
           <InputWithLabel
@@ -106,7 +108,9 @@ const SignUp = () => {
             placeholder="Password"
             label="Confirm Password"
           />
-          <Button>Sign Up</Button>
+          <Button squared className="mt-4">
+            Sign Up
+          </Button>
           {error && <p>{error}</p>}
         </Form>
         <Form
@@ -114,6 +118,7 @@ const SignUp = () => {
             e.preventDefault();
             onSignIn(e);
           }}
+          className="mb-6"
         >
           <h2>Sign In</h2>
           {loginError && <p>{loginError}</p>}
@@ -135,19 +140,25 @@ const SignUp = () => {
             placeholder="Password"
             label="Password"
           />
-          <Button>Sign In</Button>
-          <Button
-            onClick={(e) => {
-              e.preventDefault();
-              setError("");
-              signInWithGoogle();
-            }}
-          >
-            Sign in with google
-          </Button>
+          <div className="flex flex-row justify-between">
+            <Button squared className="mt-4">
+              Sign In
+            </Button>
+            <Button
+              onClick={(e) => {
+                e.preventDefault();
+                setError("");
+                signInWithGoogle();
+              }}
+              squared
+              className="mt-4"
+            >
+              Sign in with google
+            </Button>
+          </div>
         </Form>
-      </main>
-    </div>
+      </div>
+    </Container>
   );
 };
 

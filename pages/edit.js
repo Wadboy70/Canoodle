@@ -1,22 +1,15 @@
-import { arrayUnion } from "firebase/firestore";
 import { useAuth } from "lib/AuthUserContext";
-import {
-  addFirestoreDoc,
-  COLLECTION_NAMES,
-  getSingleFirestoreDoc,
-  mergeFirestoreDoc,
-  simpleQuery,
-  updateFirestoreDoc,
-} from "lib/firestore";
+import { addUnsortedRecipe, checkForUserListOrCreate } from "lib/firestore";
 import getRecipe from "lib/getRecipe";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import Button from "src/Button";
-import Form from "src/Form";
+import { useState, useEffect } from "react";
+import Button from "components/Button";
+import Form from "components/Form";
 import styles from "styles/Edit.module.css";
+import Image from "next/image";
+import Container from "components/Container";
 
 const drillAndReplace = (obj, arr, rep) => {
-  console.log(obj, arr);
   if (!arr.length) return rep;
   return Array.isArray(obj)
     ? replaceAt(obj, arr[0], drillAndReplace(obj[arr[0]], arr.slice(1), rep))
@@ -42,13 +35,13 @@ const ListType = ({ top, children }) => {
     );
 };
 
-const renderInstructions = (
+export const RenderInstructions = ({
   instructions,
-  top = false,
   drill = ["instructions"],
-  setParsedRecipe,
-  parsedRecipe
-) => {
+  onChangeInput = () => {},
+  editMode = false,
+  top = false,
+}) => {
   return (
     <ListType top={top}>
       {instructions.map((instruction, i) => {
@@ -57,43 +50,42 @@ const renderInstructions = (
             <li>
               <ul key={i}>
                 <li>
-                  <input
-                    type="text"
-                    value={instruction.name}
-                    onChange={(e) => {
-                      setParsedRecipe(
-                        drillAndReplace(
-                          parsedRecipe,
-                          [...drill, i, "name"],
-                          e.target.value
-                        )
-                      );
-                    }}
-                    style={{ width: "100%" }}
-                  />
+                  {editMode ? (
+                    <input
+                      type="text"
+                      value={instruction.name}
+                      onChange={(e) => onChangeInput(e, drill)}
+                    />
+                  ) : (
+                    <span>{instruction.name}</span>
+                  )}
                 </li>
-                {renderInstructions(
-                  instruction.subElements,
-                  false,
-                  [...drill, i, "subElements"],
-                  setParsedRecipe,
-                  parsedRecipe
-                )}
+                <RenderInstructions
+                  instructions={instruction.subElement}
+                  drill={[...drill, i, "subElements"]}
+                  onChangeInput={onChangeInput}
+                  editMode={editMode}
+                />
               </ul>
             </li>
           );
         }
         return (
           <li key={i} className={styles["grow-wrap"]}>
-            <textarea
-              type="text"
-              value={instruction}
-              onChange={(e) => {
-                setParsedRecipe(
-                  drillAndReplace(parsedRecipe, [...drill, i], e.target.value)
-                );
-              }}
-            />
+            {editMode ? (
+              <textarea
+                type="text"
+                value={instruction}
+                onChange={(e) => {
+                  setParsedRecipe(
+                    drillAndReplace(parsedRecipe, [...drill, i], e.target.value)
+                  );
+                }}
+                className="w-full resize-none"
+              />
+            ) : (
+              <span>{instruction}</span>
+            )}
           </li>
         );
       })}
@@ -101,14 +93,38 @@ const renderInstructions = (
   );
 };
 
+const RenderIngredients = ({ ingredients, editMode, onChangeIngredients }) => (
+  <ul>
+    {ingredients.map((ingredient, i) => (
+      <li key={i}>
+        {editMode ? (
+          <input
+            type="text"
+            value={ingredient}
+            onChange={(e) => onChangeIngredients(e, i)}
+            style={{ width: "100%" }}
+          />
+        ) : (
+          <p>{ingredient}</p>
+        )}
+      </li>
+    ))}
+  </ul>
+);
+
 const Edit = ({ recipe }) => {
   const [parsedRecipe, setParsedRecipe] = useState(
     recipe ? JSON.parse(recipe) : null
   );
+  const [editMode, setEditMode] = useState(false);
   const router = useRouter();
   const { authUser } = useAuth();
   const [loading, setLoading] = useState(false);
-  if (!recipe) {
+  useEffect(() => {
+    setParsedRecipe(recipe ? JSON.parse(recipe) : null);
+  }, [recipe]);
+
+  if (!parsedRecipe) {
     return (
       <div className={styles.main}>
         <p>This recipe cannot be found :(</p>
@@ -120,32 +136,12 @@ const Edit = ({ recipe }) => {
     if (loading) return;
     setLoading(true);
     if (authUser) {
-      const newDoc = await addFirestoreDoc(
-        COLLECTION_NAMES.RECIPE_DATA,
-        parsedRecipe
-      );
-      const exists = await getSingleFirestoreDoc(
-        COLLECTION_NAMES.RECIPE_LISTS,
-        authUser.uid
-      );
-
-      if (exists) {
-        console.log(
-          await updateFirestoreDoc(
-            { "All_Recipes.list": arrayUnion(newDoc.docId) },
-            COLLECTION_NAMES.RECIPE_LISTS,
-            authUser.uid
-          )
-        );
-      } else
-        await mergeFirestoreDoc(
-          {
-            All_Recipes: { list: [newDoc.docId], name: "All Recipes" },
-            uid: authUser.uid,
-          },
-          COLLECTION_NAMES.RECIPE_LISTS,
-          authUser.uid
-        );
+      const userListSuccess = await checkForUserListOrCreate(authUser.uid);
+      const addNew = await addUnsortedRecipe(authUser.uid, parsedRecipe);
+      if (!addNew || !userListSuccess) {
+        setLoading(false);
+        return;
+      }
       router.push("/dashboard");
     } else if (typeof window !== "undefined") {
       alert("log in to save recipes!");
@@ -153,48 +149,80 @@ const Edit = ({ recipe }) => {
     setLoading(false);
   };
 
+  const EditContainer = editMode
+    ? Form
+    : ({ children, ...props }) => <div {...props}>{children}</div>;
+
   return (
-    <div className={styles.main}>
-      <h1>Edit Recipe</h1>
-      <p>Click the fields below to edit the recipes!</p>
-      <Form>
-        <Button onClick={saveRecipe}>Save Recipe</Button>
-        {/* <Button>Discard Recipe</Button> */}
-        <br />
+    <Container className="pt-0">
+      <EditContainer className="bg-white h-full p-8 rounded-xl w-full">
+        <h1 className="w-full text-center">Result</h1>
+        <div className="flex flex-row justify-between">
+          <Button onClick={saveRecipe} squared gray>
+            <Image src="/heart.svg" width="20" height="20" alt="heart Logo" />
+            <span className="ml-1">Save Recipe</span>
+          </Button>
+          <Button
+            onClick={() => {
+              setEditMode(!editMode);
+            }}
+            squared
+            gray
+          >
+            <Image src="/edit.svg" width="20" height="20" alt="edit Logo" />
+            <span className="ml-1">
+              {editMode ? "Exit Edit Mode" : "Edit Recipe"}
+            </span>
+          </Button>
+        </div>
+        <div
+          className="w-full h-40 bg-cover bg-center mt-4 rounded-xl"
+          style={{
+            backgroundImage: `url(${
+              typeof parsedRecipe.image === "string"
+                ? parsedRecipe.image
+                : Array.isArray(parsedRecipe.image)
+                ? typeof parsedRecipe?.image?.[0] === "string"
+                  ? parsedRecipe?.image?.[0]
+                  : parsedRecipe?.image?.[0].url
+                : parsedRecipe.image.url
+            })`,
+          }}
+        ></div>
         {loading && <p>loading...</p>}
-        <h2>Instructions</h2>
-        {renderInstructions(
-          parsedRecipe.instructions,
-          true,
-          ["instructions"],
-          setParsedRecipe,
-          parsedRecipe
-        )}
         <h2>Ingredients</h2>
-        <ul>
-          {parsedRecipe.ingredients.map((ingredient, i) => (
-            <li key={i}>
-              <input
-                type="text"
-                value={ingredient}
-                onChange={(e) =>
-                  setParsedRecipe({
-                    ...parsedRecipe,
-                    ingredients: replaceAt(
-                      parsedRecipe.ingredients,
-                      i,
-                      e.target.value
-                    ),
-                  })
-                }
-                style={{ width: "100%" }}
-              />
-            </li>
-          ))}
-        </ul>
-        <Button onClick={saveRecipe}>Save Recipe</Button>
-      </Form>
-    </div>
+        <RenderIngredients
+          ingredients={parsedRecipe.ingredients}
+          editMode={editMode}
+          onChangeIngredients={(e, i) =>
+            setParsedRecipe({
+              ...parsedRecipe,
+              ingredients: replaceAt(
+                parsedRecipe.ingredients,
+                i,
+                e.target.value
+              ),
+            })
+          }
+        />
+        <h2>Instructions</h2>
+        <RenderInstructions
+          instructions={parsedRecipe.instructions}
+          drill={["instructions"]}
+          onChangeInput={(e, drill) => {
+            setParsedRecipe(
+              drillAndReplace(
+                parsedRecipe,
+                [...drill, i, "name"],
+                e.target.value
+              )
+            );
+          }}
+          top
+          editMode={editMode}
+        />
+      </EditContainer>
+    </Container>
   );
 };
 
@@ -204,6 +232,8 @@ export async function getServerSideProps(context) {
   const recipes = await getRecipe(context.query.url);
 
   if (!recipes) return { props: {} };
+
+  console.log("running");
 
   return {
     props: {

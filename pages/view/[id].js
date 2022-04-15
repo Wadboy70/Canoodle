@@ -1,19 +1,11 @@
-import { arrayUnion } from "firebase/firestore";
 import { useAuth } from "lib/AuthUserContext";
-import {
-  addFirestoreDoc,
-  COLLECTION_NAMES,
-  getSingleFirestoreDoc,
-  mergeFirestoreDoc,
-  simpleQuery,
-  updateFirestoreDoc,
-} from "lib/firestore";
-import getRecipe from "lib/getRecipe";
+import { COLLECTION_NAMES, getSingleFirestoreDoc } from "lib/firestore";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import Button from "src/Button";
-import Form from "src/Form";
+import Form from "components/Form";
 import styles from "styles/View.module.css";
+import { RenderInstructions } from "pages/edit";
+import Container from "components/Container";
 
 const drillAndReplace = (obj, arr, rep) => {
   console.log(obj, arr);
@@ -41,41 +33,6 @@ const ListType = ({ top, children }) => {
       </li>
     );
 };
-
-const renderInstructions = (
-  instructions,
-  top = false,
-  drill = ["instructions"]
-) => {
-  return (
-    <ListType top={top}>
-      {instructions.map((instruction, i) => {
-        if (typeof instruction === "object") {
-          return (
-            <li>
-              <ul key={i}>
-                <li>
-                  <p>{instruction.name}</p>
-                </li>
-                {renderInstructions(instruction.subElements, false, [
-                  ...drill,
-                  i,
-                  "subElements",
-                ])}
-              </ul>
-            </li>
-          );
-        }
-        return (
-          <li key={i} className={styles["grow-wrap"]}>
-            <p>{instruction}</p>
-          </li>
-        );
-      })}
-    </ListType>
-  );
-};
-
 const View = ({ id }) => {
   const router = useRouter();
   const { authUser, loading } = useAuth();
@@ -122,11 +79,18 @@ const View = ({ id }) => {
   }
 
   return (
-    <div className={styles.main}>
+    <Container>
       <div
         style={{
-          "background-image": `url(${
-            typeof recipe.image === "string" ? recipe.image : recipe?.image?.[0]
+          //this block is repeated in many files; DRY it
+          backgroundImage: `url(${
+            typeof recipe.image === "string"
+              ? recipe.image
+              : Array.isArray(recipe.image)
+              ? typeof recipe?.image?.[0] === "string"
+                ? recipe?.image?.[0]
+                : recipe?.image?.[0].url
+              : recipe.image.url
           })`,
         }}
         className={styles.banner}
@@ -135,7 +99,7 @@ const View = ({ id }) => {
       <Form>
         <br />
         <h2>Instructions</h2>
-        {renderInstructions(recipe.instructions, true, ["instructions"])}
+        <RenderInstructions instructions={recipe.instructions} top />
         <h2>Ingredients</h2>
         <ul>
           {recipe.ingredients.map((ingredient, i) => (
@@ -145,7 +109,7 @@ const View = ({ id }) => {
           ))}
         </ul>
       </Form>
-    </div>
+    </Container>
   );
 };
 
