@@ -158,6 +158,7 @@ const ControlPanel = ({ setShowPopup }) => {
           squared
           gray
           shadow
+          customColor
           className="bg-green-200"
         >
           {" "}
@@ -171,6 +172,7 @@ const ControlPanel = ({ setShowPopup }) => {
           squared
           gray
           shadow
+          customColor
           className="bg-green-200"
         >
           Add List
@@ -183,6 +185,7 @@ const ControlPanel = ({ setShowPopup }) => {
         squared
         gray
         shadow
+        customColor
         className="bg-yellow-100"
       >
         {editMode ? "Exit Selection Mode" : "Select/ Edit Recipes"}
