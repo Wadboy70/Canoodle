@@ -1,4 +1,4 @@
-import { arrayUnion } from "firebase/firestore";
+import { arrayRemove, arrayUnion } from "firebase/firestore";
 import { useAuth } from "lib/AuthUserContext";
 import {
   addFirestoreDoc,
@@ -8,6 +8,7 @@ import {
   moveRecipe,
   updateFirestoreDoc,
   removeRecipeFromList,
+  deleteSingleFirestoreDoc,
 } from "lib/firestore";
 import Link from "next/link";
 import { useEffect, useState, useContext } from "react";
@@ -92,44 +93,50 @@ const Dashboard = () => {
   return (
     <Container>
       <SelectProvider>
-        <div className="flex justify-center items-center flex-col w-full">
-          <h1>Dashboard</h1>
-          <ControlPanel setShowPopup={setShowPopup} />
-        </div>
-        <div className="w-full grow">
-          {gallery && (
-            <RecipeProvider>
-              <RecipeList
-                recipeData={{
-                  recipeIdList: gallery.unsorted,
-                  name: "All Saved Recipes",
-                }}
-                expandedDefault
-              />
-              {gallery.values?.map((recipeData) => {
-                return (
-                  <RecipeList key={recipeData.id} recipeData={recipeData} />
-                );
-              })}
-            </RecipeProvider>
-          )}
-          {showPopup && (
-            <PopupInput
-              onSubmit={popupSubmit}
-              placeholder="New List Name"
-              name="Add New List"
-              setPopupView={setShowPopup}
+        <RecipeProvider>
+          <div className="flex justify-center items-center flex-col w-full">
+            <h1>Dashboard</h1>
+            <ControlPanel
+              setShowPopup={setShowPopup}
+              gallery={gallery}
+              populateGallery={populateGallery}
             />
-          )}
-        </div>
+          </div>
+          <div className="w-full grow">
+            {gallery && (
+              <>
+                <RecipeList
+                  recipeData={{
+                    recipeIdList: gallery.unsorted,
+                    name: "All Saved Recipes",
+                  }}
+                  expandedDefault
+                />
+                {gallery.values?.map((recipeData) => {
+                  return (
+                    <RecipeList key={recipeData.id} recipeData={recipeData} />
+                  );
+                })}
+              </>
+            )}
+            {showPopup && (
+              <PopupInput
+                onSubmit={popupSubmit}
+                placeholder="New List Name"
+                name="Add New List"
+                setPopupView={setShowPopup}
+              />
+            )}
+          </div>
+        </RecipeProvider>
       </SelectProvider>
     </Container>
   );
 };
 
-const ControlPanel = ({ setShowPopup }) => {
-  const { editMode, setEditMode } = useContext(SelectContext);
-  const { select } = useContext(SelectContext);
+const ControlPanel = ({ setShowPopup, gallery, populateGallery }) => {
+  const { editMode, setEditMode, select } = useContext(SelectContext);
+  const { hydrateRecipes, setHydrateRecipes } = useContext(RecipeContext);
   const { authUser } = useAuth();
   const router = useRouter();
 
@@ -150,20 +157,64 @@ const ControlPanel = ({ setShowPopup }) => {
     router.push("/list");
   };
 
+  const deleteSelectedRecipes = async () => {
+    if (typeof window === undefined) return;
+    console.log(gallery.values, select);
+    //remove recipe id from lists
+    select?.forEach(async (recipeId) => {
+      gallery?.values?.forEach(async (recipeList) => {
+        await updateFirestoreDoc(
+          {
+            recipes: arrayRemove(recipeId),
+          },
+          COLLECTION_NAMES.RECIPE_LIST_DATA,
+          recipeList.id
+        );
+      });
+      //remove recipe from unsorted recipe list
+      await updateFirestoreDoc(
+        {
+          unsorted: arrayRemove(recipeId),
+        },
+        COLLECTION_NAMES.RECIPE_LISTS,
+        authUser.uid
+      );
+      // //delete recipe from data
+      await deleteSingleFirestoreDoc(COLLECTION_NAMES.RECIPE_DATA, recipeId);
+    });
+
+    //refresh everything on the page
+    populateGallery();
+    setHydrateRecipes(hydrateRecipes + 1);
+  };
+
   return (
     <div className="flex flex-row justify-end w-full">
       {editMode ? (
-        <Button
-          onClick={handleShoppingList}
-          squared
-          gray
-          shadow
-          customColor
-          className="bg-green-200"
-        >
-          {" "}
-          {select.length} Shopping List Recipe{select.length == 1 ? "" : "s"}
-        </Button>
+        <>
+          <Button
+            onClick={deleteSelectedRecipes}
+            squared
+            gray
+            shadow
+            customColor
+            className="bg-green-200"
+          >
+            Delete Selected Recipes
+          </Button>
+
+          <Button
+            onClick={handleShoppingList}
+            squared
+            gray
+            shadow
+            customColor
+            className="bg-green-200"
+          >
+            {" "}
+            {select.length} Shopping List Recipe{select.length == 1 ? "" : "s"}
+          </Button>
+        </>
       ) : (
         <Button
           onClick={() => {
@@ -313,8 +364,10 @@ const Recipe = ({ recipe, listId }) => {
     useContext(SelectContext);
   const { hydrateRecipes, setHydrateRecipes } = useContext(RecipeContext);
   const [position, setPosition] = useState(null);
+
   if (!recipe) return null;
-  const handleClick = (e) => {
+
+  const handleChange = (e) => {
     e.stopPropagation();
     const thisSelect = select.find((v) => v === recipe.id);
     if (thisSelect === undefined && e.target.checked) {
@@ -381,7 +434,7 @@ const Recipe = ({ recipe, listId }) => {
                 className="form-check-input appearance-none h-4 w-4 border border-slate-300 rounded-full p-4 bg-slate-300 checked:bg-green-500 checked:border-green-500 focus:outline-none transition duration-200 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer -translate-x-4 -translate-y-2"
                 type="checkbox"
                 id="flexCheckChecked"
-                onClick={handleClick}
+                onChange={handleChange}
                 checked={!!select.find((v) => v === recipe.id)}
               />
             </div>

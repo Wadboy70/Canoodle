@@ -40,8 +40,10 @@
   border: none;
 }
 
-/* .main textarea ::-webkit-scrollbar {
-  width: 0; 
-  background: transparent; 
-} 
-*/
+.textArea{
+  width: 100%;
+}
+
+.instruction > *{
+  vertical-align: text-top;  
+}
