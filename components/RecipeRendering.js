@@ -1,63 +1,52 @@
+import { memo } from "react";
 import Textarea from "react-expanding-textarea";
 import styles from "styles/Edit.module.css";
 
-const ListType = ({ top, children }) =>
-  top ? <ol>{children}</ol> : <ul>{children}</ul>;
+const Instruction = ({ id, name, editMode, onChangeInstruction }) => {
+  return (
+    <li key={id} className={styles.instruction}>
+      {editMode ? (
+        <Textarea
+          defaultValue={name}
+          className={styles.textArea}
+          onChange={(e) => {
+            onChangeInstruction({
+              id,
+              name: e.target.value,
+            });
+          }}
+        />
+      ) : (
+        <span>{name}</span>
+      )}
+    </li>
+  );
+};
+
+const MemoizedInstruction = memo(
+  Instruction,
+  (prev, next) => prev.name === next.name
+);
 
 export const RenderInstructions = ({
   instructions = [],
   editMode = false,
-  top = false,
-  level = 0,
   onChangeInstruction = () => {},
 }) => {
-  const levelArrs = [];
-  let currIndex = 0;
-
-  instructions.forEach((instruction, i) => {
-    if ((instruction.level === level || i === instructions.length - 1) && i) {
-      levelArrs.push(instructions.slice(currIndex, i + 1));
-      currIndex = i;
-    }
-  });
-  if (!levelArrs.length) {
-    return null;
-  }
-
   return (
-    <ListType top={top}>
-      {levelArrs.map((levelArr, i) => {
-        const newLevel = levelArr.slice(1);
-        const levelInstruction = levelArr[0];
+    <ol>
+      {instructions.map((instruction) => {
         return (
-          <li key={levelInstruction.id} className={styles.instruction}>
-            {editMode ? (
-              <Textarea
-                defaultValue={levelInstruction.name}
-                className={styles.textArea}
-                onChange={(e) =>
-                  onChangeInstruction({
-                    ...levelInstruction,
-                    name: e.target.value,
-                  })
-                }
-              />
-            ) : (
-              <span>{levelInstruction.name}</span>
-            )}
-            {newLevel.length !== 0 && (
-              <RenderInstructions
-                instructions={newLevel}
-                level={level + 1}
-                top={false}
-                editMode={editMode}
-                onChangeInstruction={onChangeInstruction}
-              />
-            )}
-          </li>
+          <MemoizedInstruction
+            id={instruction.id}
+            key={instruction.id}
+            name={instruction.name}
+            onChangeInstruction={onChangeInstruction}
+            editMode={editMode}
+          />
         );
       })}
-    </ListType>
+    </ol>
   );
 };
 

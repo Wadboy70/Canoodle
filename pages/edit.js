@@ -37,9 +37,6 @@ const Edit = ({ recipe }) => {
     editInstructionState,
   } = useParsedRecipe(recipe);
   const { editMode, EditContainer, toggleEditMode } = useEditRecipe();
-  // useEffect(() => {
-  //   console.log(instructionList);
-  // });
   if (!parsedRecipe) {
     return (
       <div className={styles.main}>

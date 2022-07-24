@@ -12,6 +12,7 @@
     "eslint-import-resolver-typescript": "^2.5.0",
     "firebase": "^9.6.7",
     "firebase-admin": "^10.0.2",
+    "he": "^1.2.0",
     "next": "12.0.10",
     "postcss": "^8.4.12",
     "react": "17.0.2",
