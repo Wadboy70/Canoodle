@@ -2,13 +2,13 @@ import { arrayRemove, arrayUnion } from "firebase/firestore";
 import { useAuth } from "lib/AuthUserContext";
 import {
   addFirestoreDoc,
-  checkForUserListOrCreate,
   COLLECTION_NAMES,
   getSingleFirestoreDoc,
   moveRecipe,
   updateFirestoreDoc,
   removeRecipeFromList,
   deleteSingleFirestoreDoc,
+  simpleQuery,
 } from "lib/firestore";
 import Link from "next/link";
 import { useEffect, useState, useContext } from "react";
@@ -26,12 +26,17 @@ const Dashboard = () => {
   const [gallery, setGallery] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
   const populateGallery = async () => {
-    const userList = await checkForUserListOrCreate(authUser.uid);
-    if (!userList) {
+    const userLists = await simpleQuery(
+      "uid",
+      authUser.uid,
+      COLLECTION_NAMES.LIST_DATA
+    );
+    console.log(userLists);
+    if (!userLists) {
       setGallery([]);
       return;
     }
-    setGallery(userList);
+    setGallery(userLists);
   };
   useEffect(() => {
     if (gallery === null && authUser) populateGallery();
@@ -102,23 +107,16 @@ const Dashboard = () => {
               populateGallery={populateGallery}
             />
           </div>
-          <div className="w-full grow">
-            {gallery && (
-              <>
-                <RecipeList
-                  recipeData={{
-                    recipeIdList: gallery.unsorted,
-                    name: "All Saved Recipes",
-                  }}
-                  expandedDefault
-                />
-                {gallery.values?.map((recipeData) => {
-                  return (
-                    <RecipeList key={recipeData.id} recipeData={recipeData} />
-                  );
-                })}
-              </>
-            )}
+          <div className="w-full flex flex-col grow">
+            <Link href={`/dashboard/all`}>
+              <a>All Recipes</a>
+            </Link>
+            {gallery &&
+              gallery.map((list) => (
+                <Link href={`/dashboard/${list.id}`} key={list.id}>
+                  <a>{list.name}</a>
+                </Link>
+              ))}
             {showPopup && (
               <PopupInput
                 onSubmit={popupSubmit}
@@ -356,127 +354,6 @@ const RecipeList = ({ recipeData, expandedDefault = false }) => {
         )}
       </div>
     </div>
-  );
-};
-
-const Recipe = ({ recipe, listId }) => {
-  const { select, setSelect, editMode, currentDrag, setCurrentDrag } =
-    useContext(SelectContext);
-  const { hydrateRecipes, setHydrateRecipes } = useContext(RecipeContext);
-  const [position, setPosition] = useState(null);
-
-  if (!recipe) return null;
-
-  const handleChange = (e) => {
-    e.stopPropagation();
-    const thisSelect = select.find((v) => v === recipe.id);
-    if (thisSelect === undefined && e.target.checked) {
-      setSelect([...select, recipe.id]);
-      return;
-    }
-    if (thisSelect && !e.target.checked) {
-      setSelect(
-        select.map((v) => (v === recipe.id ? null : v)).filter((v) => !!v)
-      );
-      return;
-    }
-  };
-  const handleDragStart = (e) => {
-    setCurrentDrag({
-      ...currentDrag,
-      homeRecipe: recipe.id,
-      homeList: listId,
-    });
-  };
-  const handleDragEnd = async (e) => {
-    e.stopPropagation();
-    setPosition(null);
-    if (!currentDrag.destinationList) {
-      setCurrentDrag({
-        homeRecipe: null,
-        homeList: null,
-        destinationList: null,
-      });
-    } else {
-      if (currentDrag.destinationList && currentDrag.homeRecipe) {
-        await moveRecipe(
-          currentDrag.homeRecipe,
-          currentDrag.destinationList,
-          currentDrag.homeList
-        );
-      }
-
-      setHydrateRecipes(hydrateRecipes + 1);
-
-      setCurrentDrag({
-        homeRecipe: null,
-        homeList: null,
-        destinationList: null,
-      });
-    }
-  };
-  const handleDrag = (e) => {
-    setPosition({ x: e.pageX, y: e.pageY });
-  };
-  const LinkContainer = editMode ? ({ children }) => <>{children}</> : Link;
-  return (
-    <>
-      <LinkContainer href={`/view/${recipe.id}`}>
-        <a
-          className={`border-black rounded-xl border-solid border border-0 overflow-hidden m-2 bg-white shadow-xl flex flex-col h-56`}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onDrag={handleDrag}
-        >
-          {editMode && (
-            <div className="form-check absolute">
-              <input
-                className="form-check-input appearance-none h-4 w-4 border border-slate-300 rounded-full p-4 bg-slate-300 checked:bg-green-500 checked:border-green-500 focus:outline-none transition duration-200 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer -translate-x-4 -translate-y-2"
-                type="checkbox"
-                id="flexCheckChecked"
-                onChange={handleChange}
-                checked={!!select.find((v) => v === recipe.id)}
-              />
-            </div>
-          )}
-          {recipe.image && (
-            <div
-              className="w-full bg-cover grow bg-center"
-              style={{
-                backgroundImage: `url(${
-                  typeof recipe.image === "string"
-                    ? recipe.image
-                    : Array.isArray(recipe.image)
-                    ? recipe?.image?.[0]
-                    : recipe.image.url
-                })`,
-              }}
-              alt={recipe.name}
-            />
-          )}
-          <div className="leading-10 mx-3 flex">
-            <h3 className="truncate w-4/5 grow">{recipe.name}</h3>
-            {editMode && listId && (
-              <button
-                className="focus:outline-none align-top cursor-pointer text-red-500 align-self-end ml-1"
-                type="checkbox"
-                id="flexCheckChecked"
-                onClick={async (e) => {
-                  e.stopPropagation();
-                  await removeRecipeFromList(recipe.id, listId);
-                  setHydrateRecipes(hydrateRecipes + 1);
-                }}
-              >
-                ✖
-              </button>
-            )}
-          </div>
-        </a>
-      </LinkContainer>
-      {currentDrag.homeRecipe === recipe.id && position && (
-        <DraggedRecipe recipe={recipe} position={position} />
-      )}
-    </>
   );
 };
 
