@@ -6,13 +6,13 @@ const PopupInput = ({
   onSubmit = () => {},
   placeholder = "Input Text",
   name = "Add New Value",
-  setPopupView,
+  setShowPopup,
 }) => {
-  const [listName, setListName] = useState("null");
+  const [listName, setListName] = useState(null);
   return (
     <div
       className="fixed top-0 left-0 w-screen h-screen bg-black/30 backdrop-blur-sm flex items-center justify-center"
-      onClick={() => setPopupView(false)}
+      onClick={() => setShowPopup(false)}
     >
       <Form
         onClick={(e) => e.stopPropagation()}
