@@ -1,12 +1,9 @@
-import { arrayRemove, arrayUnion } from "firebase/firestore";
+import { arrayRemove } from "firebase/firestore";
 import { useAuth } from "lib/AuthUserContext";
 import {
   addFirestoreDoc,
   COLLECTION_NAMES,
-  getSingleFirestoreDoc,
-  moveRecipe,
   updateFirestoreDoc,
-  removeRecipeFromList,
   deleteSingleFirestoreDoc,
   simpleQuery,
 } from "lib/firestore";
