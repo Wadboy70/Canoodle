@@ -6,6 +6,7 @@ import {
   updateFirestoreDoc,
   deleteSingleFirestoreDoc,
   simpleQuery,
+  getdisplayRecipeImg,
 } from "lib/firestore";
 import Link from "next/link";
 import { useEffect, useState, useContext } from "react";
@@ -32,6 +33,10 @@ const Dashboard = () => {
       setGallery([]);
       return;
     }
+    for (const i of userLists) {
+      i.image = await getdisplayRecipeImg(i.id);
+    }
+    console.log(userLists);
     setGallery(userLists);
   };
   useEffect(() => {
@@ -97,13 +102,23 @@ const Dashboard = () => {
             <ControlPanel setShowPopup={setShowPopup} gallery={gallery} />
           </div>
           <div className="w-full flex flex-col grow">
-            <Link href={`/dashboard/all`}>
-              <a>All Recipes</a>
-            </Link>
             {gallery &&
               gallery.map((list) => (
                 <Link href={`/dashboard/${list.id}`} key={list.id}>
                   <a>{list.name}</a>
+                  <div
+                    className="w-full bg-cover grow bg-center"
+                    style={{
+                      backgroundImage: `url(${
+                        typeof list.image === "string"
+                          ? list.image
+                          : Array.isArray(list.image)
+                          ? list?.image?.[0]
+                          : list.image.url
+                      })`,
+                    }}
+                    alt={list.name}
+                  />
                 </Link>
               ))}
             {showPopup && (
