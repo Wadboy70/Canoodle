@@ -39,9 +39,6 @@ const ListId = () => {
     if (!list && authUser) getList();
   });
 
-  useEffect(() => {
-    console.log(list);
-  }, [list]);
   return (
     <Container>
       <h1>Shopping List</h1>

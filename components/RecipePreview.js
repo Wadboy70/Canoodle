@@ -14,7 +14,7 @@ const RecipePreview = ({ recipe, listId }) => {
     <>
       <LinkContainer href={`/view/${recipe.id}`}>
         <a
-          className={`border-black rounded-xl border-solid border border-0 overflow-hidden m-2 bg-white shadow-xl flex flex-col h-56`}
+          className={`border-black rounded-xl border-solid border border-0 overflow-hidden m-2 bg-white shadow-xl flex flex-col aspect-square`}
         >
           {editMode && (
             <div className="form-check absolute">

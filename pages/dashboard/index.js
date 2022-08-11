@@ -17,6 +17,7 @@ import Loader from "components/Loader";
 import { useRouter } from "next/router";
 import { RecipeContext, RecipeProvider } from "lib/recipeContext";
 import { SelectContext, SelectProvider } from "lib/selectContext";
+import AllRecipes from "./all";
 
 const Dashboard = () => {
   const { authUser, loading } = useAuth();
@@ -28,7 +29,6 @@ const Dashboard = () => {
       authUser.uid,
       COLLECTION_NAMES.LIST_DATA
     );
-    console.log(userLists);
     if (!userLists) {
       setGallery([]);
       return;
@@ -36,7 +36,6 @@ const Dashboard = () => {
     for (const i of userLists) {
       i.image = await getdisplayRecipeImg(i.id);
     }
-    console.log(userLists);
     setGallery(userLists);
   };
   useEffect(() => {
@@ -101,24 +100,29 @@ const Dashboard = () => {
             <h1>Dashboard</h1>
             <ControlPanel setShowPopup={setShowPopup} gallery={gallery} />
           </div>
-          <div className="w-full flex flex-col grow">
+          <h2>Lists</h2>
+          <div className="w-full grid grid-cols-3">
             {gallery &&
               gallery.map((list) => (
                 <Link href={`/dashboard/${list.id}`} key={list.id}>
-                  <a>{list.name}</a>
-                  <div
-                    className="w-full bg-cover grow bg-center"
-                    style={{
-                      backgroundImage: `url(${
-                        typeof list.image === "string"
-                          ? list.image
-                          : Array.isArray(list.image)
-                          ? list?.image?.[0]
-                          : list.image.url
-                      })`,
-                    }}
-                    alt={list.name}
-                  />
+                  <a className="p-4">
+                    <div
+                      className="w-full bg-cover grow bg-center aspect-video rounded-xl"
+                      style={{
+                        backgroundImage: `url(${
+                          typeof list.image === "string"
+                            ? list.image
+                            : Array.isArray(list.image)
+                            ? list?.image?.[0]
+                            : list.image?.url
+                            ? list.image.url
+                            : "/default.jpg"
+                        })`,
+                      }}
+                      alt={list.name}
+                    />
+                    <p className="w-full text-center">{list.name}</p>
+                  </a>
                 </Link>
               ))}
             {showPopup && (
@@ -130,6 +134,7 @@ const Dashboard = () => {
               />
             )}
           </div>
+          <AllRecipes />
         </RecipeProvider>
       </SelectProvider>
     </Container>
@@ -161,7 +166,6 @@ const ControlPanel = ({ setShowPopup, gallery, populateGallery }) => {
 
   const deleteSelectedRecipes = async () => {
     if (typeof window === undefined) return;
-    console.log(gallery.values, select);
     //remove recipe id from lists
     select?.forEach(async (recipeId) => {
       gallery?.values?.forEach(async (recipeList) => {

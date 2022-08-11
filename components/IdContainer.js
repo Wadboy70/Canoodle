@@ -10,17 +10,13 @@ const IdContainer = ({ name, recipes, id = null }) => {
       </Container>
     );
   return (
-    <Container>
-      <div className="w-full flex flex-col grow">
-        <div className="flex justify-center items-center flex-col w-full">
-          <h1>{name}</h1>
-          <div className="w-full flex flex-col grow">
-            {recipes &&
-              recipes.map((recipe) => (
-                <RecipePreview key={recipe.id} recipe={recipe} listId={id} />
-              ))}
-          </div>
-        </div>
+    <Container className="w-full">
+      <h1>{name}</h1>
+      <div className="w-full grid-cols-4 grid grow">
+        {recipes &&
+          recipes.map((recipe) => (
+            <RecipePreview key={recipe.id} recipe={recipe} listId={id} />
+          ))}
       </div>
     </Container>
   );

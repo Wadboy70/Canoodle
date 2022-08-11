@@ -7,32 +7,12 @@ import styles from "styles/View.module.css";
 import { RenderInstructions } from "pages/edit";
 import Container from "components/Container";
 
-const drillAndReplace = (obj, arr, rep) => {
-  console.log(obj, arr);
-  if (!arr.length) return rep;
-  return Array.isArray(obj)
-    ? replaceAt(obj, arr[0], drillAndReplace(obj[arr[0]], arr.slice(1), rep))
-    : {
-        ...obj,
-        [arr[0]]: drillAndReplace(obj[arr[0]], arr.slice(1), rep),
-      };
-};
-
 export const replaceAt = (array, index, value) => {
   const ret = array.slice(0);
   ret[index] = value;
   return ret;
 };
 
-const ListType = ({ top, children }) => {
-  if (top) return <ol>{children}</ol>;
-  else
-    return (
-      <li>
-        <ul>{children}</ul>
-      </li>
-    );
-};
 const View = ({ id }) => {
   const router = useRouter();
   const { authUser, loading } = useAuth();
@@ -46,8 +26,7 @@ const View = ({ id }) => {
         id
       );
 
-      if (recipeData && !recipeData.error) {
-        console.log(recipeData);
+      if (recipeData && !recipeData.error) {]
         setRecipe(recipeData);
       }
       setloadingRecipe(false);

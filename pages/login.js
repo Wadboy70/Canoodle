@@ -33,14 +33,12 @@ const SignUp = () => {
   });
 
   const onSubmit = async (event) => {
-    console.log("submit");
     event.preventDefault();
     setError(null);
 
     if (passwordOne === passwordTwo)
       await createFirebaseUserWithEmailAndPassword(email, passwordOne)
         .then(async (authUser) => {
-          console.log("Success. The user is created in Firebase", authUser);
           await addFirestoreDoc(COLLECTION_NAMES.USERS, {
             uid: authUser.user.uid,
             email: authUser.user.email,
@@ -58,7 +56,6 @@ const SignUp = () => {
     else setError("Password do not match");
   };
   const onSignIn = async (e) => {
-    console.log("signing in");
     await signInWithFirebaseEmailAndPassword(
       loginEmail,
       loginPassword,
