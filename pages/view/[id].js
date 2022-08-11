@@ -1,11 +1,19 @@
 import { useAuth } from "lib/AuthUserContext";
-import { COLLECTION_NAMES, getSingleFirestoreDoc } from "lib/firestore";
-import { useRouter } from "next/router";
+import {
+  COLLECTION_NAMES,
+  deleteSingleFirestoreDoc,
+  getSingleFirestoreDoc,
+  simpleQuery,
+} from "lib/firestore";
 import { useEffect, useState } from "react";
 import Form from "components/Form";
 import styles from "styles/View.module.css";
-import { RenderInstructions } from "pages/edit";
 import Container from "components/Container";
+import { RenderInstructions } from "components/RecipeRendering";
+import Image from "next/image";
+import Button from "components/Button";
+import { useRouter } from "next/router";
+import Loader from "components/Loader";
 
 export const replaceAt = (array, index, value) => {
   const ret = array.slice(0);
@@ -26,7 +34,7 @@ const View = ({ id }) => {
         id
       );
 
-      if (recipeData && !recipeData.error) {]
+      if (recipeData && !recipeData.error) {
         setRecipe(recipeData);
       }
       setloadingRecipe(false);
@@ -36,9 +44,9 @@ const View = ({ id }) => {
 
   if (loading || loadingRecipe) {
     return (
-      <div className={styles.main}>
-        <p>loading...</p>
-      </div>
+      <Container>
+        <Loader />
+      </Container>
     );
   } else if (authUser === null && !loading) {
     return (
@@ -56,6 +64,33 @@ const View = ({ id }) => {
       </div>
     );
   }
+
+  const deleteRecipe = async () => {
+    if (typeof window === "undefined") return;
+    const deleteConf = confirm(
+      "do you want to delete this recipe? this cannot be undone"
+    );
+    if (!deleteConf) return;
+    setloadingRecipe(true);
+    //delete recipe
+    await deleteSingleFirestoreDoc(COLLECTION_NAMES.RECIPE_DATA, id);
+    //get all lists that the recipe is in
+    const recipeLists = await simpleQuery(
+      "recipe_id",
+      id,
+      COLLECTION_NAMES.RECIPE_LISTS
+    );
+    //delete the recipe from all of those lists
+    recipeLists?.forEach(async (recipeList) => {
+      await deleteSingleFirestoreDoc(
+        COLLECTION_NAMES.RECIPE_LISTS,
+        recipeList.id
+      );
+    });
+
+    setloadingRecipe(false);
+    router.push("/dashboard");
+  };
 
   return (
     <Container>
@@ -75,10 +110,13 @@ const View = ({ id }) => {
         className={styles.banner}
       />
       <h1>{recipe.name}</h1>
+      <Button onClick={deleteRecipe}>
+        <Image src="/trash.svg" width="20" height="20" alt="trash Logo" />
+      </Button>
       <Form>
         <br />
         <h2>Instructions</h2>
-        <RenderInstructions instructions={recipe.instructions} top />
+        <RenderInstructions instructions={recipe.instructions} />
         <h2>Ingredients</h2>
         <ul>
           {recipe.ingredients.map((ingredient, i) => (

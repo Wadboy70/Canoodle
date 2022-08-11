@@ -60,6 +60,17 @@ const Dashboard = () => {
   }
 
   const popupSubmit = async (listName, setListName) => {
+    //check if list can be added
+    const listCount = (
+      await simpleQuery("uid", authUser.uid, COLLECTION_NAMES.LIST_DATA)
+    ).length;
+
+    if (listCount > 2) {
+      //AND user is not premium
+      alert("Upgrade to premium to add more lists!");
+      return;
+    }
+
     const trimmedListName = listName?.trim();
     if (!trimmedListName) return;
 
