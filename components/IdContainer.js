@@ -10,12 +10,10 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import Button from "./Button";
 import Loader from "./Loader";
-import { PopupOverlayAndForm } from "./PopupInput";
 
 const IdContainer = ({ name, recipes, id = null }) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [showForm, setShowForm] = useState(false);
   if (!name || loading)
     return (
       <Container>
@@ -57,7 +55,6 @@ const IdContainer = ({ name, recipes, id = null }) => {
           <Image src="/trash.svg" width="20" height="20" alt="trash Logo" />
         </Button>
       )}
-      {showForm && <PopupOverlayAndForm></PopupOverlayAndForm>}
       <div className="w-full grid-cols-4 grid grow">
         {recipes &&
           recipes.map((recipe) => (
