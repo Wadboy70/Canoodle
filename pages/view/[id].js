@@ -118,25 +118,25 @@ const View = ({ id }) => {
         className={styles.banner}
       />
       <h1>{recipe.name}</h1>
-      <Button onClick={deleteRecipe}>
-        <Image src="/trash.svg" width="20" height="20" alt="trash Logo" />
-      </Button>
-      <Button onClick={turnOnForm}>
-        <Image src="/plus.svg" width="20" height="20" alt="plus Logo" />
-      </Button>
-      <Form>
+      <div className="flex flex-row mb-4">
+        <Button onClick={deleteRecipe}>Delete</Button>
+        <Button onClick={turnOnForm}>
+          <span>Add to Lists</span>
+        </Button>
+      </div>
+      <div className="bg-white w-full flex flex-col px-8 pb-4 items-start">
         <br />
-        <h2>Instructions</h2>
+        <h2 className="mt-0">Instructions</h2>
         <RenderInstructions instructions={recipe.instructions} />
         <h2>Ingredients</h2>
-        <ul>
+        <ul className="mx-4">
           {recipe.ingredients.map((ingredient, i) => (
             <li key={i}>
               <p>{ingredient}</p>
             </li>
           ))}
         </ul>
-      </Form>
+      </div>
       <AddRecipeForm
         showForm={showForm}
         setShowForm={setShowForm}
@@ -222,19 +222,21 @@ const AddRecipeForm = ({ showForm, setShowForm, recipeId }) => {
 
   return (
     <PopupOverlayAndForm hidePopup={turnOffForm}>
+      <h1 className="mt-0">Add to Lists</h1>
       {loading ? (
         <Loader />
       ) : lists ? (
-        <ul>
+        <ul className="list-none">
           {lists.map((list) => {
             return (
-              <li key={list.id}>
+              <li key={list.id} className="block">
                 <input
                   type="checkbox"
                   name={list.name}
                   id={list.id}
                   defaultChecked={list.checked}
                   onChange={(e) => changeListChecked(e, list)}
+                  className="mr-2 align-middle"
                 />
                 <span>{list.name}</span>
               </li>

@@ -207,56 +207,13 @@ const ControlPanel = ({ setShowPopup, gallery, populateGallery }) => {
 
   return (
     <div className="flex flex-row justify-end w-full">
-      {editMode ? (
-        <>
-          <Button
-            onClick={deleteSelectedRecipes}
-            squared
-            gray
-            shadow
-            customColor
-            className="bg-green-200"
-          >
-            Delete Selected Recipes
-          </Button>
-
-          <Button
-            onClick={handleShoppingList}
-            squared
-            gray
-            shadow
-            customColor
-            className="bg-green-200"
-          >
-            {" "}
-            {select.length} Shopping List Recipe{select.length == 1 ? "" : "s"}
-          </Button>
-        </>
-      ) : (
-        <Button
-          onClick={() => {
-            setShowPopup(true);
-          }}
-          squared
-          gray
-          shadow
-          customColor
-          className="bg-green-200"
-        >
-          Add List
-        </Button>
-      )}
       <Button
         onClick={() => {
-          setEditMode(!editMode);
+          setShowPopup(true);
         }}
-        squared
-        gray
         shadow
-        customColor
-        className="bg-yellow-100"
       >
-        {editMode ? "Exit Selection Mode" : "Select/ Edit Recipes"}
+        Add List
       </Button>
     </div>
   );

@@ -34,7 +34,7 @@ export const RenderInstructions = ({
   onChangeInstruction = () => {},
 }) => {
   return (
-    <ol>
+    <ol className="mx-4">
       {instructions.map((instruction) => {
         return (
           <MemoizedInstruction
@@ -55,7 +55,7 @@ export const RenderIngredients = ({
   editMode,
   onChangeIngredients,
 }) => (
-  <ul>
+  <ul className="mx-4">
     {ingredients.map((ingredient, i) => (
       <li key={i}>
         {editMode ? (

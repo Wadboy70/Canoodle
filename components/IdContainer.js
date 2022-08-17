@@ -50,11 +50,7 @@ const IdContainer = ({ name, recipes, id = null }) => {
   return (
     <Container className="w-full">
       <h1>{name}</h1>
-      {id && (
-        <Button onClick={deleteList}>
-          <Image src="/trash.svg" width="20" height="20" alt="trash Logo" />
-        </Button>
-      )}
+      {id && <Button onClick={deleteList}>Delete List</Button>}
       <div className="w-full grid-cols-4 grid grow">
         {recipes &&
           recipes.map((recipe) => (
