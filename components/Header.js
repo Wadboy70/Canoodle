@@ -30,7 +30,7 @@ const Header = () => {
   return (
     <header className="shadow-lg sticky py-4 px-3 flex sticky top-0 bg-white z-50">
       <Link href={"/"}>
-        <a className="flex items-center w-1/3">
+        <a className="flex items-center w-1/2 md:w-1/3">
           <Image
             src="/canoodle.png"
             alt="canoodle logo"
@@ -39,7 +39,10 @@ const Header = () => {
           />
         </a>
       </Link>
-      <form className="w-1/3 flex justify-center" onSubmit={formSubmit}>
+      <form
+        className="hidden w-1/3 md:flex justify-center"
+        onSubmit={formSubmit}
+      >
         <div className="bg-slate-200 rounded-full flex px-4">
           <span className="w-5 flex">
             <Image src="/search.svg" width="20" height="20" alt="Search Logo" />
@@ -56,7 +59,7 @@ const Header = () => {
         </div>
         <button className="hidden" type="submit"></button>
       </form>
-      <nav className="flex items-center w-1/3 justify-end">
+      <nav className="flex items-center w-1/2 md:w-1/3 justify-end">
         {authUser ? (
           <>
             <Link href="/dashboard">

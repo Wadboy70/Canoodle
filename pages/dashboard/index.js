@@ -112,7 +112,7 @@ const Dashboard = () => {
             <ControlPanel setShowPopup={setShowPopup} gallery={gallery} />
           </div>
           <h2>Lists</h2>
-          <div className="w-full grid grid-cols-3">
+          <div className="w-full grid grid-cols-2 md:grid-cols-4 px-10">
             {gallery &&
               gallery.map((list) => (
                 <Link href={`/dashboard/${list.id}`} key={list.id}>

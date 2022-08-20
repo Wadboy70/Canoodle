@@ -49,9 +49,9 @@ const IdContainer = ({ name, recipes, id = null }) => {
   };
   return (
     <Container className="w-full">
-      <h1>{name}</h1>
+      <h2>{name}</h2>
       {id && <Button onClick={deleteList}>Delete List</Button>}
-      <div className="w-full grid-cols-4 grid grow">
+      <div className="w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-6 grid grow">
         {recipes &&
           recipes.map((recipe) => (
             <RecipePreview key={recipe.id} recipe={recipe} listId={id} />

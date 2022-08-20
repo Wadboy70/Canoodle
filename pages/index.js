@@ -25,7 +25,7 @@ const Home = () => {
   const router = useRouter();
   return (
     <Container bgImage>
-      <Form className="min-w-3/5 flex flex-col items-center py-32">
+      <Form className="min-w-3/5 flex flex-col items-center py-32 max-w-full">
         <h1 className="font-bold text-3xl mb-4">Explore Recipes</h1>
         <InputWithLabel
           type="text"
@@ -33,8 +33,8 @@ const Home = () => {
           onChange={(event) => setCurrentRecipe(event.target.value)}
           name="site"
           id="recipeSiteValue"
-          placeholder="https://www.food.com/morefood"
-          className="w-96 mb-4"
+          placeholder="www.food.com/morefood"
+          className="w-96 mb-4 max-w-full"
         />
         <Button
           onClick={async (e) => {
