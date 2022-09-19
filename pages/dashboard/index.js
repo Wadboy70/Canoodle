@@ -7,6 +7,7 @@ import {
   deleteSingleFirestoreDoc,
   simpleQuery,
   getdisplayRecipeImg,
+  getSingleFirestoreDoc,
 } from "lib/firestore";
 import Link from "next/link";
 import { useEffect, useState, useContext } from "react";
@@ -18,6 +19,7 @@ import { useRouter } from "next/router";
 import { RecipeContext, RecipeProvider } from "lib/recipeContext";
 import { SelectContext, SelectProvider } from "lib/selectContext";
 import AllRecipes from "./all";
+import { SUB_LEVELS } from "lib/constants";
 
 const Dashboard = () => {
   const { authUser, loading } = useAuth();
@@ -64,8 +66,12 @@ const Dashboard = () => {
     const listCount = (
       await simpleQuery("uid", authUser.uid, COLLECTION_NAMES.LIST_DATA)
     ).length;
+    //realistically this logic needs to be moved to the backend
+    const isPremium =
+      (await getSingleFirestoreDoc(COLLECTION_NAMES.USERS, authUser.uid))
+        .subscription === SUB_LEVELS.LIFETIME;
 
-    if (listCount > 2) {
+    if (listCount > 2 && !isPremium) {
       //AND user is not premium
       alert("Upgrade to premium to add more lists!");
       return;

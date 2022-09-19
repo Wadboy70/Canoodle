@@ -1,5 +1,4 @@
 import getRecipe from "lib/getRecipe";
-import { useEffect } from "react";
 import Button from "components/Button";
 import styles from "styles/Edit.module.css";
 import Image from "next/image";

@@ -8,16 +8,20 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@stripe/react-stripe-js": "^1.10.0",
+    "@stripe/stripe-js": "^1.35.0",
     "autoprefixer": "^10.4.4",
     "eslint-import-resolver-typescript": "^2.5.0",
     "firebase": "^9.6.7",
     "firebase-admin": "^10.0.2",
     "he": "^1.2.0",
+    "micro": "^9.4.1",
     "next": "12.0.10",
     "postcss": "^8.4.12",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-expanding-textarea": "^2.3.6",
+    "stripe": "^10.3.0",
     "tailwindcss": "^3.0.23",
     "uuid": "^8.3.2",
     "web-auto-extractor": "^1.0.17"
